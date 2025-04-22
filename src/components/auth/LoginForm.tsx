@@ -1,9 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TextField, Button, Box, Typography, CircularProgress, Container, Paper } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  CircularProgress,
+  Container,
+  Paper,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { auth } from "../../firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, AuthError } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  AuthError,
+} from "firebase/auth";
 
 interface LoginFormData {
   email: string;
@@ -18,7 +31,8 @@ const LoginForm: React.FC = () => {
     formState: { errors },
   } = useForm<LoginFormData>();
   const [authError, setAuthError] = useState<string>("");
-  const [isSubmittingStandardAuth, setIsSubmittingStandardAuth] = useState(false);
+  const [isSubmittingStandardAuth, setIsSubmittingStandardAuth] =
+    useState(false);
   const [isSubmittingTwitterAuth, setIsSubmittingTwitterAuth] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
@@ -40,28 +54,27 @@ const LoginForm: React.FC = () => {
     }
   };
 
-const loginWithGoogle = async () => {
-  setIsSubmittingTwitterAuth(true);
-  setAuthError("");
-  console.log("Google login started");
+  const loginWithGoogle = async () => {
+    setIsSubmittingTwitterAuth(true);
+    setAuthError("");
+    console.log("Google login started");
 
-  try {
-    const provider = new GoogleAuthProvider();
-    console.log("GoogleAuthProvider initialized");
+    try {
+      const provider = new GoogleAuthProvider();
+      console.log("GoogleAuthProvider initialized");
 
-    const result = await signInWithPopup(auth, provider);
-    console.log("Google login success:", result.user);
-
-    navigate("/");
-  } catch (error) {
-    const firebaseError = error as AuthError;
-    console.error("Google login error:", firebaseError);
-    setAuthError(`Google login failed: ${firebaseError.message}`);
-  } finally {
-    setIsSubmittingTwitterAuth(false);
-    console.log("Google login ended");
-  }
-};
+      const result = await signInWithPopup(auth, provider);
+      console.log("Google login success:", result.user);
+      navigate("/");
+    } catch (error) {
+      const firebaseError = error as AuthError;
+      console.error("Google login error:", firebaseError);
+      setAuthError(`Google login failed: ${firebaseError.message}`);
+    } finally {
+      setIsSubmittingTwitterAuth(false);
+      console.log("Google login ended");
+    }
+  };
 
   return (
     <Container maxWidth="sm">
@@ -77,7 +90,10 @@ const loginWithGoogle = async () => {
             type="email"
             {...register("email", {
               required: "Email is required",
-              pattern: { value: /^\S+@\S+$/i, message: "Invalid email address" },
+              pattern: {
+                value: /^\S+@\S+$/i,
+                message: "Invalid email address",
+              },
             })}
             error={!!errors.email}
             helperText={errors.email?.message}
@@ -100,8 +116,18 @@ const loginWithGoogle = async () => {
             </Typography>
           )}
 
-          <Button type="submit" fullWidth variant="contained" disabled={isSubmittingStandardAuth} sx={{ mt: 3, mb: 2 }}>
-            {isSubmittingStandardAuth ? <CircularProgress size={24} /> : "Login"}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={isSubmittingStandardAuth}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {isSubmittingStandardAuth ? (
+              <CircularProgress size={24} />
+            ) : (
+              "Login"
+            )}
           </Button>
 
           <Button
@@ -111,9 +137,19 @@ const loginWithGoogle = async () => {
             disabled={isSubmittingTwitterAuth}
             sx={{ mb: 2 }}
           >
-            {isSubmittingTwitterAuth ? <CircularProgress size={24} /> : "Login with Google"}
+            {isSubmittingTwitterAuth ? (
+              <CircularProgress size={24} />
+            ) : (
+              "Login with Google"
+            )}
           </Button>
         </Box>
+        <button
+          className="mx-auto w-full cursor-pointer underline"
+          onClick={() => navigate("/register")}
+        >
+          If you don't have an account you can register here
+        </button>
       </Paper>
     </Container>
   );

@@ -1,11 +1,24 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TextField, Button, Box, Typography, CircularProgress, Container, Paper } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  CircularProgress,
+  Container,
+  Paper,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { auth } from "../../firebase";
-import { createUserWithEmailAndPassword, AuthError } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  AuthError,
+  updateProfile,
+} from "firebase/auth";
 
 interface RegisterFormData {
+  name: string;
   email: string;
   password: string;
 }
@@ -25,8 +38,14 @@ const RegisterForm: React.FC = () => {
     setAuthError("");
 
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
-      navigate("/");
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+      console.log(result);
+      await updateProfile(result.user, { displayName: data.name });
+      navigate("/login");
     } catch (error) {
       const firebaseError = error as AuthError;
       if (firebaseError.code === "auth/email-already-in-use") {
@@ -47,6 +66,18 @@ const RegisterForm: React.FC = () => {
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
+          <TextField
+            fullWidth
+            label="Name"
+            type="name"
+            {...register("name", {
+              required: "Name is required",
+              minLength: 2,
+            })}
+            error={!!errors.name}
+            helperText={errors.name?.message}
+            margin="normal"
+          />
           <TextField
             fullWidth
             label="Email"
@@ -85,10 +116,22 @@ const RegisterForm: React.FC = () => {
             </Typography>
           )}
 
-          <Button type="submit" fullWidth variant="contained" disabled={isSubmitting} sx={{ mt: 3 }}>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={isSubmitting}
+            sx={{ mt: 3 }}
+          >
             {isSubmitting ? <CircularProgress size={24} /> : "Register"}
           </Button>
         </Box>
+        <button
+          className="mx-auto w-full cursor-pointer underline mt-2"
+          onClick={() => navigate("/login")}
+        >
+          If you already have an account you can Log in here
+        </button>
       </Paper>
     </Container>
   );
