@@ -7,10 +7,8 @@ import { UserDataProvider } from "./context/UserContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <UserDataProvider>
-        <App />
-      </UserDataProvider>
-    </BrowserRouter>
+    <UserDataProvider>
+      <App />
+    </UserDataProvider>
   </StrictMode>
 );
