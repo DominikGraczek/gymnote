@@ -4,8 +4,9 @@ import { Routine } from "../../models/routine";
 import { Exercise } from "../../models/exercise";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
-import { useUserData } from "../../context/UserContext";
-
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../../firebase";
+import { firestoreService } from "../../services/firestoreService";
 export const CreateRoutineForm = () => {
   const [routineName, setRoutineName] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -15,9 +16,8 @@ export const CreateRoutineForm = () => {
     reps: "",
   });
 
-  const { userProfile, routines, setRoutines } = useUserData();
   const navigate = useNavigate();
-
+  const [user] = useAuthState(auth);
   const handleAddExercise = () => {
     const { name, sets, reps } = exerciseInput;
 
@@ -35,19 +35,23 @@ export const CreateRoutineForm = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!userProfile) return;
+    if (!user) return;
 
     const newRoutine: Routine = {
       id: uuidv4(),
-      uid: userProfile.uid,
+      uid: user.uid,
       name: routineName,
       exercises,
     };
+    try {
+      await firestoreService.addRoutine(newRoutine);
+    } catch (e) {
+      console.log(e);
+    }
 
-    setRoutines([...routines, newRoutine]);
     navigate("/routines");
   };
 

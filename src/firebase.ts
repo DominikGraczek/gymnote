@@ -3,8 +3,10 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+const api_key = import.meta.env.VITE_API_KEY;
+console.log(api_key);
 const firebaseConfig = {
-  apiKey: "AIzaSyBgj1nEvwBd1IViCfNbBrHnNtd6G8gbHcU",
+  apiKey: api_key,
   authDomain: "gym-note-90498.firebaseapp.com",
   projectId: "gym-note-90498",
   storageBucket: "gym-note-90498.firebasestorage.app",

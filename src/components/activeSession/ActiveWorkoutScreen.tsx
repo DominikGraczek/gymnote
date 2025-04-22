@@ -6,17 +6,21 @@ import { ExerciseLogInput } from "./ExerciseLogInput";
 import { WorkoutSummary } from "./WorkoutSummary";
 import { useUserData } from "../../context/UserContext";
 import { v4 as uuidv4 } from "uuid";
+import { firestoreService } from "../../services/firestoreService";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../../firebase";
 
 export const ActiveWorkoutScreen = () => {
-  const { id } = useParams();
+  const { name } = useParams();
   const { routines, userProfile, history, setHistory } = useUserData();
-  const routine = routines.find((r) => r.id === id);
+  const routine = routines.find((r) => r.name === name);
   const [startTime] = useState(Date.now());
   const [endTime, setEndTime] = useState<number | null>(null);
   const [logs, setLogs] = useState<
     Record<string, { reps: number; weight: number }[]>
   >({});
   const [finished, setFinished] = useState(false);
+  const [user] = useAuthState(auth);
 
   if (!routine) return <p className="text-white">Routine not found</p>;
 
@@ -26,19 +30,24 @@ export const ActiveWorkoutScreen = () => {
   ) => {
     setLogs((prev) => ({ ...prev, [exercise.name]: log }));
   };
-
-  const handleFinishWorkout = () => {
+  if (!user) return;
+  const handleFinishWorkout = async () => {
     const newSession = {
       id: uuidv4(),
-      uid: userProfile?.uid || "anonymous",
-      trainingId: routine.id,
+      uid: user.uid,
+      routineId: routine.id,
       startedAt: new Date(startTime).toISOString(),
       endedAt: new Date().toISOString(),
       exercisesDone: Object.entries(logs).flatMap(([name, sets]) =>
         sets.map((s) => ({ name, sets: s }))
       ),
     };
-    setHistory([...history, newSession]);
+    try {
+      await firestoreService.addSession(newSession);
+    } catch (e) {
+      console.log(e);
+    }
+
     setEndTime(Date.now());
     setFinished(true);
   };

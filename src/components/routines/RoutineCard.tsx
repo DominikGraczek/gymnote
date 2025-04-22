@@ -9,7 +9,7 @@ export const RoutineCard = ({ routine }: RoutineCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/routines/${routine.id}`);
+    navigate(`/routines/${routine.name}`);
   };
 
   return (

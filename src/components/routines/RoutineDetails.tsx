@@ -4,9 +4,9 @@ import { MoveLeft } from "lucide-react";
 
 const RoutineDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { name } = useParams();
   const { routines } = useUserData();
-  const routine = routines.find((r) => r.id === id);
+  const routine = routines.find((r) => r.name === name);
 
   if (!routine) return <p>Routine not found</p>;
 
@@ -24,7 +24,7 @@ const RoutineDetails = () => {
       </h1>
 
       <button
-        onClick={() => navigate(`/workout/${routine.id}`)}
+        onClick={() => navigate(`/workout/${routine.name}`)}
         className="bg-purple-500 text-white py-3 w-full rounded-full font-semibold mb-6"
       >
         Start Training
