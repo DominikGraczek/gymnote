@@ -1,22 +1,65 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+
+const INITIAL_TIME = 120; // 2 minutes in seconds
 
 export const RestTimer = () => {
-  const [seconds, setSeconds] = useState(0);
+  const [seconds, setSeconds] = useState(INITIAL_TIME);
   const [isRunning, setIsRunning] = useState(false);
+  const [isVibrating, setIsVibrating] = useState(false);
+  const [vibrationInterval, setVibrationInterval] = useState<NodeJS.Timeout | null>(null);
+
+  const startVibration = useCallback(() => {
+    if (vibrationInterval) return;
+    
+    const interval = setInterval(() => {
+      if (navigator.vibrate) {
+        navigator.vibrate(1000); // Vibrate for 1 second
+      }
+    }, 2000); // Repeat every 2 seconds
+    
+    setVibrationInterval(interval);
+    setIsVibrating(true);
+  }, [vibrationInterval]);
+
+  const stopVibration = useCallback(() => {
+    if (vibrationInterval) {
+      clearInterval(vibrationInterval);
+      setVibrationInterval(null);
+    }
+    if (navigator.vibrate) {
+      navigator.vibrate(0); // Stop vibration
+    }
+    setIsVibrating(false);
+  }, [vibrationInterval]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning) {
+    if (isRunning && seconds > 0) {
       interval = setInterval(() => {
-        setSeconds((prev) => prev + 1);
+        setSeconds((prev) => prev - 1);
       }, 1000);
+    } else if (seconds === 0 && isRunning) {
+      setIsRunning(false);
+      startVibration();
     }
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, seconds, startVibration]);
+
+  useEffect(() => {
+    const handlePowerButton = (e: KeyboardEvent) => {
+      if (e.key === 'Power' || e.key === 'PowerOff') {
+        stopVibration();
+      }
+    };
+
+    window.addEventListener('keydown', handlePowerButton);
+    return () => window.removeEventListener('keydown', handlePowerButton);
+  }, [stopVibration]);
 
   const resetTimer = () => {
-    setSeconds(0);
+    setSeconds(INITIAL_TIME);
     setIsRunning(false);
+    stopVibration();
   };
 
   const formatTime = (s: number) => {
@@ -33,12 +76,14 @@ export const RestTimer = () => {
         <button
           className="bg-white text-purple-500 px-4 py-2 rounded"
           onClick={() => setIsRunning(true)}
+          disabled={isRunning || seconds === 0}
         >
           Start
         </button>
         <button
           className="bg-white text-purple-500 px-4 py-2 rounded"
           onClick={() => setIsRunning(false)}
+          disabled={!isRunning}
         >
           Stop
         </button>
@@ -49,6 +94,11 @@ export const RestTimer = () => {
           Reset
         </button>
       </div>
+      {isVibrating && (
+        <div className="mt-4 text-sm">
+          Timer finished! Press power button to stop vibration.
+        </div>
+      )}
     </div>
   );
 };
