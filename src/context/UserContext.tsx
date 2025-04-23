@@ -1,9 +1,9 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
   ReactNode,
+  useEffect,
 } from "react";
 // import { User, onAuthStateChanged } from "firebase/auth";
 // import { auth } from "../firebase/firebaseConfig";
@@ -13,16 +13,12 @@ import {
 //   getWorkoutHistory,
 // } from "../services/firebaseService";
 import { Routine } from "../models/routine";
-import { UserProfile } from "../models/user";
 import { Session } from "../models/session";
-
-import { mockRoutines, mockSessions, mockUserProfile } from "../mockdata";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase";
+import { firestoreService } from "../services/firestoreService";
 
 interface UserDataContextType {
-  // user: User | null;
-  // setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  userProfile: UserProfile | null;
-  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>;
   routines: Routine[];
   setRoutines: React.Dispatch<React.SetStateAction<Routine[]>>;
   history: Session[];
@@ -39,56 +35,48 @@ const UserDataContext = createContext<UserDataContextType | undefined>(
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   // const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(
-    mockUserProfile
-  );
-  const [routines, setRoutines] = useState<Routine[]>(mockRoutines);
-  const [history, setHistory] = useState<Session[]>(mockSessions);
+
+  const [routines, setRoutines] = useState<Routine[]>([]);
+  const [history, setHistory] = useState<Session[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [user] = useAuthState(auth);
+  useEffect(() => {
+    const fetchRoutines = async () => {
+      if (!user) return;
+      try {
+        const result = await firestoreService.getRoutines(user.uid);
+        setRoutines(result);
+      } catch (e) {
+        console.error("Failed to fetch routines:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-  //     if (firebaseUser) {
-  //       setUser(firebaseUser);
-  //       const profile = await getUserData(firebaseUser.uid);
-  //       const userTrainings = await getUserTrainings(firebaseUser.uid);
-  //       const userHistory = await getWorkoutHistory(firebaseUser.uid);
-  //       setUserProfile(profile as UserProfile);
-  //       setRoutines(userTrainings as Routine[]);
-  //       setHistory(userHistory as Session[]);
-  //     } else {
-  //       setUser(null);
-  //       setUserProfile(null);
-  //       setRoutines([]);
-  //       setHistory([]);
-  //     }
-  //     setLoading(false);
-  //   });
+    fetchRoutines();
+  }, [user]);
+  useEffect(() => {
+    const fetchSessions = async () => {
+      if (!user) return;
 
-  //   return () => unsubscribe();
-  // }, []);
+      try {
+        setLoading(true);
+        const userSessions = await firestoreService.getSessions(user.uid);
+        setHistory(userSessions);
+      } catch (err) {
+        console.error("Error fetching sessions:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // const refreshTrainings = async () => {
-  //   if (user) {
-  //     const newTrainings = await getUserTrainings(user.uid);
-  //     setRoutines(newTrainings as Routine[]);
-  //   }
-  // };
-
-  // const refreshHistory = async () => {
-  //   if (user) {
-  //     const newHistory = await getWorkoutHistory(user.uid);
-  //     setHistory(newHistory as Session[]);
-  //   }
-  // };
-
+    fetchSessions();
+  }, [user]);
   return (
     <UserDataContext.Provider
       value={{
         // user,
         // setUser,
-        userProfile,
-        setUserProfile,
         routines,
         setRoutines,
         history,

@@ -1,35 +1,14 @@
-import { useEffect, useState } from "react";
 import { RoutineCard } from "./RoutineCard";
 import { useNavigate } from "react-router";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../../firebase";
-import { firestoreService } from "../../services/firestoreService";
-import { Routine } from "../../models/routine";
 import { useUserData } from "../../context/UserContext";
+import LoadingSpinner from "../LoadingSpinner";
 
 export const RoutineList = () => {
   const navigate = useNavigate();
-  const [user] = useAuthState(auth);
-  const { routines, setRoutines, loading, setLoading } = useUserData();
 
-  useEffect(() => {
-    const fetchRoutines = async () => {
-      if (!user) return;
-      try {
-        const result = await firestoreService.getRoutines(user.uid);
-        setRoutines(result);
-      } catch (e) {
-        console.error("Failed to fetch routines:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { routines, loading } = useUserData();
 
-    fetchRoutines();
-  }, [user]);
-
-  if (!user) return null;
-  if (loading) return <p className="p-4">Loading routines...</p>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="p-4">

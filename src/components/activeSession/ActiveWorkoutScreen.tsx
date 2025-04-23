@@ -12,7 +12,7 @@ import { auth } from "../../firebase";
 
 export const ActiveWorkoutScreen = () => {
   const { name } = useParams();
-  const { routines, userProfile, history, setHistory } = useUserData();
+  const { routines, history, setHistory } = useUserData();
   const routine = routines.find((r) => r.name === name);
   const [startTime] = useState(Date.now());
   const [endTime, setEndTime] = useState<number | null>(null);
@@ -42,6 +42,7 @@ export const ActiveWorkoutScreen = () => {
         sets.map((s) => ({ name, sets: s }))
       ),
     };
+    setHistory([...history, newSession]);
     try {
       await firestoreService.addSession(newSession);
     } catch (e) {

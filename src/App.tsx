@@ -12,12 +12,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Settings from "./components/settingsPage/settings";
 import { auth } from "./firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { StatsPage } from "./components/statistics/StatsPage";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 function App() {
   const [user, loading] = useAuthState(auth);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -86,6 +88,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <StatsPage />
               </ProtectedRoute>
             }
           />

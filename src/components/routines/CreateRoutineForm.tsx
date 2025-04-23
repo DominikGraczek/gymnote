@@ -7,6 +7,7 @@ import { useNavigate } from "react-router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase";
 import { firestoreService } from "../../services/firestoreService";
+import { useUserData } from "../../context/UserContext";
 export const CreateRoutineForm = () => {
   const [routineName, setRoutineName] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -15,7 +16,7 @@ export const CreateRoutineForm = () => {
     sets: "",
     reps: "",
   });
-
+  const { routines, setRoutines } = useUserData();
   const navigate = useNavigate();
   const [user] = useAuthState(auth);
   const handleAddExercise = () => {
@@ -48,6 +49,7 @@ export const CreateRoutineForm = () => {
     };
     try {
       await firestoreService.addRoutine(newRoutine);
+      setRoutines([...routines, newRoutine]);
     } catch (e) {
       console.log(e);
     }

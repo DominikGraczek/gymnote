@@ -1,67 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { WorkoutSessionCard } from "./WorkoutSessionCard";
 import { WorkoutDetailsModal } from "./WorkoutDetailsModal";
 import { Session } from "../../models/session";
-import { firestoreService } from "../../services/firestoreService";
-import { auth } from "../../firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { CircularProgress, Typography } from "@mui/material";
+
+import LoadingSpinner from "../LoadingSpinner";
+import { useUserData } from "../../context/UserContext";
 
 export const WorkoutHistoryList = () => {
-  const [user] = useAuthState(auth);
-  const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      if (!user) return;
-      
-      try {
-        setLoading(true);
-        const userSessions = await firestoreService.getSessions(user.uid);
-        setSessions(userSessions);
-      } catch (err) {
-        setError('Failed to load workout history');
-        console.error('Error fetching sessions:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessions();
-  }, [user]);
+  const { history, loading } = useUserData();
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <CircularProgress />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4">
-        <Typography color="error">{error}</Typography>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 w-full">
       <h2 className="text-2xl font-bold mb-4 text-white">Workout History</h2>
-      {sessions.length === 0 ? (
-        <Typography className="text-white">No workout sessions found</Typography>
+      {history.length === 0 ? (
+        <p className="text-black w-full text-center">
+          No workout sessions found
+        </p>
       ) : (
-        sessions.map((session) => (
-          <WorkoutSessionCard
-            key={session.id}
-            session={session}
-            onClick={() => setSelectedSession(session)}
-          />
-        ))
+        history
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+          )
+          .map((session) => (
+            <WorkoutSessionCard
+              key={session.id}
+              session={session}
+              onClick={() => setSelectedSession(session)}
+            />
+          ))
       )}
 
       {selectedSession && (

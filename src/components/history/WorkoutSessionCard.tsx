@@ -1,3 +1,4 @@
+import { useUserData } from "../../context/UserContext";
 import { Session } from "../../models/session";
 
 interface Props {
@@ -6,6 +7,8 @@ interface Props {
 }
 
 export const WorkoutSessionCard = ({ session, onClick }: Props) => {
+  const { routines } = useUserData();
+  const routine = routines.find((r) => r.id === session.routineId);
   const date = new Date(session.startedAt);
   return (
     <div
@@ -13,7 +16,7 @@ export const WorkoutSessionCard = ({ session, onClick }: Props) => {
       onClick={onClick}
     >
       <h3 className="text-lg font-bold mb-1">
-        Workout on {date.toLocaleDateString()}
+        {routine ? routine.name : "Workout"} on {date.toLocaleDateString()}
       </h3>
       <p className="text-sm">Started at: {date.toLocaleTimeString()}</p>
       {session.endedAt && (

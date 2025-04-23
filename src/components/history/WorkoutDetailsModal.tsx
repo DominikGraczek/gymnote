@@ -1,3 +1,4 @@
+import { useUserData } from "../../context/UserContext";
 import { Session } from "../../models/session";
 
 interface Props {
@@ -13,7 +14,8 @@ export const WorkoutDetailsModal = ({ session, onClose }: Props) => {
     acc[curr.name].push(curr.sets);
     return acc;
   }, {});
-
+  const { routines } = useUserData();
+  const routine = routines.find((r) => r.id === session.routineId);
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white text-black h-full w-full p-6 relative">
@@ -24,7 +26,9 @@ export const WorkoutDetailsModal = ({ session, onClose }: Props) => {
           &times;
         </button>
 
-        <h2 className="text-xl font-bold mb-4">Workout Details</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {routine ? routine.name : "Workout"} Details
+        </h2>
         <p className="text-sm mb-2">
           Started at: {new Date(session.startedAt).toLocaleString()}
         </p>
