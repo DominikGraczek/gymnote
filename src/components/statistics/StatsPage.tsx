@@ -3,7 +3,6 @@ import { firestoreService } from "../../services/firestoreService";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase";
 import { useUserData } from "../../context/UserContext";
-import dayjs from "dayjs";
 import {
   PieChart,
   Pie,
@@ -14,6 +13,7 @@ import {
 } from "recharts";
 import { Session } from "../../models/session";
 import LoadingSpinner from "../LoadingSpinner";
+import { ExerciseLog } from "../../models/exerciseLog";
 
 type ChartData = {
   name: string;
@@ -32,7 +32,7 @@ export const StatsPage = () => {
     totalWeight: 0,
   });
   const [radialChartData, setRadialChartData] = useState<ChartData[]>([]);
-
+  console.log(sessions);
   useEffect(() => {
     if (!user) return;
     const fetchStats = async () => {
@@ -46,11 +46,11 @@ export const StatsPage = () => {
 
         const routineCountMap: Record<string, number> = {};
 
-        result.forEach((session: any) => {
+        result.forEach((session: Session) => {
           routineCountMap[session.routineId] =
             (routineCountMap[session.routineId] || 0) + 1;
 
-          session.exercisesDone.forEach((exercise: any) => {
+          session.exercisesDone.forEach((exercise: ExerciseLog) => {
             const s = exercise.sets;
             totalSets += 1;
             totalReps += s.reps;

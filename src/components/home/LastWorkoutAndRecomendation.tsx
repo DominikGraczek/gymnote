@@ -5,11 +5,13 @@ import { firestoreService } from "../../services/firestoreService";
 import { useUserData } from "../../context/UserContext";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router";
+import { ExerciseLog } from "../../models/exerciseLog";
+import { Session } from "../../models/session";
 
 export const LastWorkoutAndRecommendation = () => {
   const [user] = useAuthState(auth);
   const { routines, setRoutines } = useUserData();
-  const [lastSession, setLastSession] = useState<any | null>(null);
+  const [lastSession, setLastSession] = useState<Session | null>(null);
   const [recommendation, setRecommendation] = useState<string | null>(null);
   const [summary, setSummary] = useState({ sets: 0, reps: 0, weight: 0 });
   const navigate = useNavigate();
@@ -34,18 +36,14 @@ export const LastWorkoutAndRecommendation = () => {
       let totalReps = 0;
       let totalWeight = 0;
 
-      latest.exercisesDone.forEach((ex: any) => {
+      latest.exercisesDone.forEach((ex: ExerciseLog) => {
         totalSets += 1;
         totalReps += ex.sets.reps;
         totalWeight += ex.sets.reps * ex.sets.weight;
       });
 
       setSummary({ sets: totalSets, reps: totalReps, weight: totalWeight });
-
-      const lastRoutine = routines.find((r) => r.id === latest.routineId);
-      const lastName = lastRoutine?.name.toLowerCase();
-
-      let next = routines[Math.floor(Math.random() * routines.length)]?.name;
+      const next = routines[Math.floor(Math.random() * routines.length)]?.name;
 
       setRecommendation(next);
     };
