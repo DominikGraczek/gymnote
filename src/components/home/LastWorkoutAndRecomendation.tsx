@@ -17,11 +17,18 @@ export const LastWorkoutAndRecommendation = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (routines.length > 0) {
+      const next = routines[Math.floor(Math.random() * routines.length)]?.name;
+      setRecommendation(next);
+    }
+  }, [routines]);
+  useEffect(() => {
     if (!user) return;
 
     const fetchLastSession = async () => {
       const fetchroutines = await firestoreService.getRoutines(user.uid);
       setRoutines(fetchroutines);
+
       const sessions = await firestoreService.getSessions(user.uid);
       if (sessions.length === 0) return;
 
@@ -43,9 +50,6 @@ export const LastWorkoutAndRecommendation = () => {
       });
 
       setSummary({ sets: totalSets, reps: totalReps, weight: totalWeight });
-      const next = routines[Math.floor(Math.random() * routines.length)]?.name;
-
-      setRecommendation(next);
     };
 
     fetchLastSession();
@@ -92,17 +96,19 @@ export const LastWorkoutAndRecommendation = () => {
           </p>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-purple-600">
-            🎯 Recommended Next Workout
-          </h3>
-          <div
-            onClick={() => navigate(`routines/${recommendation}`)}
-            className="bg-purple-100 text-purple-800 rounded-xl px-4 py-2 text-center font-bold"
-          >
-            {recommendation}
+        {recommendation && (
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-purple-600">
+              🎯 Recommended Next Workout
+            </h3>
+            <div
+              onClick={() => navigate(`routines/${recommendation}`)}
+              className="bg-purple-100 text-purple-800 rounded-xl px-4 py-2 text-center font-bold"
+            >
+              {recommendation}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
