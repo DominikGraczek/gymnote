@@ -1,4 +1,3 @@
-// CreateRoutineForm.tsx
 import { useState } from "react";
 import { Routine } from "../../models/routine";
 import { Exercise } from "../../models/exercise";
@@ -8,6 +7,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase";
 import { firestoreService } from "../../services/firestoreService";
 import { useUserData } from "../../context/UserContext";
+
 export const CreateRoutineForm = () => {
   const [routineName, setRoutineName] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -19,9 +19,9 @@ export const CreateRoutineForm = () => {
   const { routines, setRoutines } = useUserData();
   const navigate = useNavigate();
   const [user] = useAuthState(auth);
+
   const handleAddExercise = () => {
     const { name, sets, reps } = exerciseInput;
-
     if (name && sets && reps) {
       setExercises([
         ...exercises,
@@ -31,14 +31,12 @@ export const CreateRoutineForm = () => {
           reps: parseInt(reps),
         },
       ]);
-
       setExerciseInput({ name: "", sets: "", reps: "" });
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!user) return;
 
     const newRoutine: Routine = {
@@ -47,94 +45,101 @@ export const CreateRoutineForm = () => {
       name: routineName,
       exercises,
     };
+
     try {
       await firestoreService.addRoutine(newRoutine);
       setRoutines([...routines, newRoutine]);
+      navigate("/routines");
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
-
-    navigate("/routines");
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mx-auto p-4 bg-white rounded-xl shadow-md my-10"
-    >
-      <h2 className="text-xl font-bold mb-4">Create New Routine</h2>
+    <div className="h-11/12 bg-gray-50 px-4 py-6 flex flex-col">
+      <h2 className="text-2xl font-bold text-center text-purple-700 mb-6">
+        🏋️ Create New Routine
+      </h2>
 
-      <input
-        type="text"
-        placeholder="Routine Name"
-        value={routineName}
-        onChange={(e) => setRoutineName(e.target.value)}
-        className="w-full mb-4 p-2 border rounded"
-        required
-      />
-
-      <div className="mb-4">
-        <h3 className="font-semibold mb-2">Add Exercise</h3>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 flex-grow">
         <input
           type="text"
-          placeholder="Exercise Name"
-          value={exerciseInput.name}
-          onChange={(e) =>
-            setExerciseInput({ ...exerciseInput, name: e.target.value })
-          }
-          className="w-full mb-2 p-2 border rounded"
+          placeholder="Routine name"
+          value={routineName}
+          onChange={(e) => setRoutineName(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+          required
         />
-        <div className="flex gap-2">
+
+        <div className="bg-white p-4 rounded-xl shadow-sm border space-y-3">
+          <h3 className="text-lg font-semibold text-gray-700">Add Exercise</h3>
           <input
-            type="number"
-            placeholder="Sets"
-            value={exerciseInput.sets}
+            type="text"
+            placeholder="Exercise name"
+            value={exerciseInput.name}
             onChange={(e) =>
-              setExerciseInput({
-                ...exerciseInput,
-                sets: e.target.value,
-              })
+              setExerciseInput({ ...exerciseInput, name: e.target.value })
             }
-            className="w-1/2 p-2 border rounded"
+            className="w-full p-2 border border-gray-300 rounded-md"
           />
-          <input
-            type="number"
-            placeholder="Reps"
-            value={exerciseInput.reps}
-            onChange={(e) =>
-              setExerciseInput({
-                ...exerciseInput,
-                reps: e.target.value,
-              })
-            }
-            className="w-1/2 p-2 border rounded"
-          />
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Sets"
+              value={exerciseInput.sets}
+              onChange={(e) =>
+                setExerciseInput({ ...exerciseInput, sets: e.target.value })
+              }
+              className="w-1/2 p-2 border border-gray-300 rounded-md"
+            />
+            <input
+              type="number"
+              placeholder="Reps"
+              value={exerciseInput.reps}
+              onChange={(e) =>
+                setExerciseInput({ ...exerciseInput, reps: e.target.value })
+              }
+              className="w-1/2 p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleAddExercise}
+            className="w-full mt-2 bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700"
+          >
+            Add Exercise
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleAddExercise}
-          className="mt-2 bg-purple-500 text-white py-2 px-4 rounded"
-        >
-          Add Exercise
-        </button>
-      </div>
 
-      {exercises.length > 0 && (
-        <ul className="mb-4 list-disc list-inside text-sm">
-          {exercises.map((ex, i) => (
-            <li key={i}>
-              {ex.name} - {ex.sets} sets x {ex.reps} reps @ {ex.weight}kg
-            </li>
-          ))}
-        </ul>
-      )}
+        {exercises.length > 0 && (
+          <div className="bg-white rounded-xl p-4 shadow-sm border text-sm text-gray-700">
+            <h4 className="font-semibold mb-2">📋 Exercise List</h4>
+            <ul className="list-disc list-inside space-y-1">
+              {exercises.map((ex, i) => (
+                <li key={i}>
+                  {ex.name} – {ex.sets} sets × {ex.reps} reps
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      <button
-        type="submit"
-        className="w-full bg-green-600 text-white py-2 px-4 rounded font-semibold"
-      >
-        Save Routine
-      </button>
-    </form>
+        <div className="mt-auto space-y-2">
+          <button
+            type="submit"
+            className="w-full bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600"
+          >
+            Save Routine
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/routines")}
+            className="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:bg-red-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
