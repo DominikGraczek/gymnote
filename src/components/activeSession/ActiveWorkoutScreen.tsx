@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router";
 import { Exercise } from "../../models/exercise";
 import { RestTimer } from "./RestTimer";
@@ -16,18 +16,13 @@ export const ActiveWorkoutScreen = () => {
   const routine = routines.find((r) => r.name === name);
   const [startTime] = useState(Date.now());
   const [endTime, setEndTime] = useState<number | null>(null);
-  const [logs, setLogs] = useState<
-    Record<string, { reps: number; weight: number }[]>
-  >({});
+  const [logs, setLogs] = useState<Record<string, { reps: number; weight: number }[]>>({});
   const [finished, setFinished] = useState(false);
   const [user] = useAuthState(auth);
 
   if (!routine) return <p className="text-white">Routine not found</p>;
 
-  const handleLogUpdate = (
-    exercise: Exercise,
-    log: { reps: number; weight: number }[]
-  ) => {
+  const handleLogUpdate = (exercise: Exercise, log: { reps: number; weight: number }[]) => {
     setLogs((prev) => ({ ...prev, [exercise.name]: log }));
   };
   if (!user) return;
@@ -38,9 +33,7 @@ export const ActiveWorkoutScreen = () => {
       routineId: routine.id,
       startedAt: new Date(startTime).toISOString(),
       endedAt: new Date().toISOString(),
-      exercisesDone: Object.entries(logs).flatMap(([name, sets]) =>
-        sets.map((s) => ({ name, sets: s }))
-      ),
+      exercisesDone: Object.entries(logs).flatMap(([name, sets]) => sets.map((s) => ({ name, sets: s }))),
     };
     setHistory([...history, newSession]);
     try {
@@ -50,6 +43,7 @@ export const ActiveWorkoutScreen = () => {
     }
 
     setEndTime(Date.now());
+    console.log(endTime);
     setFinished(true);
   };
 
@@ -61,11 +55,7 @@ export const ActiveWorkoutScreen = () => {
         <>
           <RestTimer />
           {routine.exercises.map((exercise, i) => (
-            <ExerciseLogInput
-              key={i}
-              exercise={exercise}
-              onUpdate={(log) => handleLogUpdate(exercise, log)}
-            />
+            <ExerciseLogInput key={i} exercise={exercise} onUpdate={(log) => handleLogUpdate(exercise, log)} />
           ))}
 
           <button

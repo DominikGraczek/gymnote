@@ -3,14 +3,7 @@ import { firestoreService } from "../../services/firestoreService";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase";
 import { useUserData } from "../../context/UserContext";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Session } from "../../models/session";
 import LoadingSpinner from "../LoadingSpinner";
 import { ExerciseLog } from "../../models/exerciseLog";
@@ -47,8 +40,7 @@ export const StatsPage = () => {
         const routineCountMap: Record<string, number> = {};
 
         result.forEach((session: Session) => {
-          routineCountMap[session.routineId] =
-            (routineCountMap[session.routineId] || 0) + 1;
+          routineCountMap[session.routineId] = (routineCountMap[session.routineId] || 0) + 1;
 
           session.exercisesDone.forEach((exercise: ExerciseLog) => {
             const s = exercise.sets;
@@ -65,15 +57,13 @@ export const StatsPage = () => {
           totalWeight,
         });
 
-        const chartData = Object.entries(routineCountMap).map(
-          ([routineId, count]) => {
-            const routine = routines.find((r) => r.id === routineId);
-            return {
-              name: routine?.name || "Unknown Routine",
-              value: count,
-            };
-          }
-        );
+        const chartData = Object.entries(routineCountMap).map(([routineId, count]) => {
+          const routine = routines.find((r) => r.id === routineId);
+          return {
+            name: routine?.name || "Unknown Routine",
+            value: count,
+          };
+        });
 
         setRadialChartData(chartData);
       } catch (e) {
@@ -86,14 +76,7 @@ export const StatsPage = () => {
     fetchStats();
   }, [user, routines]);
 
-  const COLORS = [
-    "#8b5cf6",
-    "#f59e0b",
-    "#10b981",
-    "#ef4444",
-    "#3b82f6",
-    "#6366f1",
-  ];
+  const COLORS = ["#8b5cf6", "#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#6366f1"];
 
   if (!user) return;
   if (loading) return <LoadingSpinner />;
@@ -103,9 +86,7 @@ export const StatsPage = () => {
       <h1 className="text-2xl font-bold mb-4">Training Stats</h1>
 
       <div className="bg-white rounded-xl p-4 shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">
-          Workout Routine Distribution
-        </h2>
+        <h2 className="text-lg font-semibold mb-4">Workout Routine Distribution</h2>
         {radialChartData.length === 0 ? (
           <p className="text-gray-500">No data available.</p>
         ) : (
@@ -122,12 +103,11 @@ export const StatsPage = () => {
                 fill="#8884d8"
                 label
               >
-                {radialChartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
+                {radialChartData.map(
+                  (entry, index) => (
+                    console.log(entry), (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
+                  )
+                )}
               </Pie>
               <Tooltip />
               <Legend />
