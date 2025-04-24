@@ -67,7 +67,7 @@ const Settings: React.FC = () => {
     <Container maxWidth="sm">
       <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          Ustawienia
+          Settings
         </Typography>
 
         <Box

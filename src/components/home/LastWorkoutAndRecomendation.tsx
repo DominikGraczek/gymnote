@@ -69,7 +69,7 @@ export const LastWorkoutAndRecommendation = () => {
 
   return (
     <div className="flex items-center justify-center h-3/4">
-      <div className="bg-white text-black rounded-2xl shadow-xl w-full  p-6 space-y-6">
+      <div className="bg-white text-black rounded-2xl w-full  p-6 space-y-6">
         <h2 className="text-2xl font-bold text-center mb-2">🏋️ Last Workout</h2>
 
         <div className="bg-gray-100 rounded-xl p-4 space-y-2">

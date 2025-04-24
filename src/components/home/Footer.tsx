@@ -6,7 +6,7 @@ import {
   Settings,
 } from "lucide-react";
 import { ReactElement } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavItemProps {
   icon: ReactElement;
@@ -25,6 +25,12 @@ const NavItem = ({ icon, label, to }: NavItemProps) => (
 );
 
 export const Footer = () => {
+  const location = useLocation();
+  const hide =
+    location.pathname === "/login" || location.pathname === "/register";
+
+  if (hide) return null;
+
   return (
     <footer className="fixed bottom-0 left-0 right-0 md:static md:w-48 md:h-full bg-purple-100 flex md:flex-col justify-between md:justify-start items-center px-4 py-3 md:py-6 md:gap-6 text-black shadow-lg z-50">
       <NavItem icon={<History />} label="History" to="/history" />
