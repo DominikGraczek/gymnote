@@ -37,6 +37,24 @@ export const WorkoutSummary = ({
         <p className="mb-1">⏱ Duration: {formatTime(elapsed)}</p>
         <p>🔥 Calories Burned: {calculateCalories()} kcal</p>
       </div>
+      <label
+        htmlFor="photoInput"
+        className="block text-center text-black bg-purple-400 mt-2 rounded-lg p-4 cursor-pointer"
+      >
+        📷 Tap to take a photo
+      </label>
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+      />
+
+      <textarea
+        className="text-black border-1 rounded-xl w-full p-2 mt-2 pb-10"
+        placeholder="Leave a note about workout"
+      />
       <button
         className="text-black flex gap-x-2 font-bold bg-gray-300 px-4 py-2 rounded-full mx-auto mt-5"
         onClick={() => navigate("/")}
