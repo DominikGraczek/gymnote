@@ -1,5 +1,15 @@
 import { db } from "../firebase";
-import { collection, addDoc, getDocs, query, where, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { Session } from "../models/session";
 import { Routine } from "../models/routine";
 import { Exercise } from "../models/exercise";
@@ -9,9 +19,15 @@ export const firestoreService = {
   // Sessions
   async getSessions(userId: string): Promise<Session[]> {
     const sessionsRef = collection(db, "sessions");
-    const q = query(sessionsRef, where("uid", "==", userId), orderBy("startedAt", "desc"));
+    const q = query(
+      sessionsRef,
+      where("uid", "==", userId),
+      orderBy("startedAt", "desc")
+    );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Session));
+    return querySnapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() } as Session)
+    );
   },
 
   async addSession(session: Omit<Session, "id">): Promise<string> {
@@ -20,7 +36,10 @@ export const firestoreService = {
     return docRef.id;
   },
 
-  async updateSession(sessionId: string, updates: Partial<Session>): Promise<void> {
+  async updateSession(
+    sessionId: string,
+    updates: Partial<Session>
+  ): Promise<void> {
     const sessionRef = doc(db, "sessions", sessionId);
     await updateDoc(sessionRef, updates);
   },
@@ -48,7 +67,10 @@ export const firestoreService = {
     return docRef.id;
   },
 
-  async updateRoutine(routineId: string, updates: Partial<Routine>): Promise<void> {
+  async updateRoutine(
+    routineId: string,
+    updates: Partial<Routine>
+  ): Promise<void> {
     const routineRef = doc(db, "routines", routineId);
     await updateDoc(routineRef, updates);
   },
@@ -74,7 +96,10 @@ export const firestoreService = {
     return docRef.id;
   },
 
-  async updateExercise(exerciseId: string, updates: Partial<Exercise>): Promise<void> {
+  async updateExercise(
+    exerciseId: string,
+    updates: Partial<Exercise>
+  ): Promise<void> {
     const exerciseRef = doc(db, "exercises", exerciseId);
     await updateDoc(exerciseRef, updates);
   },
@@ -82,5 +107,51 @@ export const firestoreService = {
   async deleteExercise(exerciseId: string): Promise<void> {
     const exerciseRef = doc(db, "exercises", exerciseId);
     await deleteDoc(exerciseRef);
+  },
+  // User goals
+  async getUserGoal(userId: string): Promise<{
+    age: number;
+    height: number;
+    weight: number;
+    goal: string;
+  } | null> {
+    const goalsRef = collection(db, "userGoals");
+    const q = query(goalsRef, where("uid", "==", userId));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) return null;
+
+    const data = snapshot.docs[0].data();
+    return {
+      age: data.age,
+      height: data.height,
+      weight: data.weight,
+      goal: data.goal,
+    };
+  },
+
+  async saveUserGoal(
+    userId: string,
+    data: { age: number; height: number; weight: number; goal: string }
+  ): Promise<void> {
+    const goalsRef = collection(db, "userGoals");
+    const q = query(goalsRef, where("uid", "==", userId));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      const docId = snapshot.docs[0].id;
+      const docRef = doc(db, "userGoals", docId);
+      await updateDoc(docRef, {
+        age: data.age,
+        height: data.height,
+        weight: data.weight,
+        goal: data.goal,
+      });
+    } else {
+      await addDoc(goalsRef, {
+        uid: userId,
+        ...data,
+      });
+    }
   },
 };
