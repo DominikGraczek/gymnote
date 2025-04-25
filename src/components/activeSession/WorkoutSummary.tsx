@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { storage } from "../../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
@@ -79,6 +79,7 @@ export const WorkoutSummary = ({
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPhotoPreview(previewUrl);
+
       await handlePhotoUpload(file);
     }
   };
@@ -87,7 +88,7 @@ export const WorkoutSummary = ({
     setIsSaving(true);
 
     const uploadedPhotoUrl = photoPreview
-      ? await handlePhotoUpload(fileInputRef.current?.files?.[0] as File)
+      ? photoPreview
       : photoUrl;
 
     const sessionData = {
@@ -103,7 +104,6 @@ export const WorkoutSummary = ({
 
     try {
       await saveSession(sessionData);
-
       navigate("/");
     } catch (err) {
       console.error("Error saving session", err);
@@ -111,14 +111,6 @@ export const WorkoutSummary = ({
       setIsSaving(false);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (photoPreview) {
-        URL.revokeObjectURL(photoPreview);
-      }
-    };
-  }, [photoPreview]);
 
   return (
     <div>
@@ -134,10 +126,10 @@ export const WorkoutSummary = ({
           className={`block text-center text-black bg-purple-400 rounded-lg p-4 cursor-pointer ${
             isUploading ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          onClick={() => !isUploading && fileInputRef.current?.click()}
         >
           {isUploading ? "📷 Uploading..." : "📷 Tap to take a photo"}
         </label>
+
         <input
           ref={fileInputRef}
           id="photoInput"
