@@ -7,4 +7,6 @@ export type Session = {
   startedAt: string;
   endedAt?: string;
   exercisesDone: ExerciseLog[];
+  photoUrl?: string | null;
+  note?: string;
 };

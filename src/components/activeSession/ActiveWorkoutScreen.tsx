@@ -5,52 +5,56 @@ import { RestTimer } from "./RestTimer";
 import { ExerciseLogInput } from "./ExerciseLogInput";
 import { WorkoutSummary } from "./WorkoutSummary";
 import { useUserData } from "../../context/UserContext";
-import { v4 as uuidv4 } from "uuid";
 import { firestoreService } from "../../services/firestoreService";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase";
+import { Session } from "../../models/session";
 
 export const ActiveWorkoutScreen = () => {
   const { name } = useParams();
   const { routines, history, setHistory } = useUserData();
   const routine = routines.find((r) => r.name === name);
   const [startTime] = useState(Date.now());
-  const [endTime, setEndTime] = useState<number | null>(null);
   const [logs, setLogs] = useState<Record<string, { reps: number; weight: number }[]>>({});
   const [finished, setFinished] = useState(false);
   const [user] = useAuthState(auth);
+  const [sessionId, setSessionId] = useState<string>("");
+  const [note, setNote] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
 
   if (!routine) return <p className="text-white">Routine not found</p>;
+  if (!user) return null;
 
   const handleLogUpdate = (exercise: Exercise, log: { reps: number; weight: number }[]) => {
     setLogs((prev) => ({ ...prev, [exercise.name]: log }));
   };
-  if (!user) return;
-  const handleFinishWorkout = async () => {
-    const newSession = {
-      id: uuidv4(),
-      uid: user.uid,
-      routineId: routine.id,
-      startedAt: new Date(startTime).toISOString(),
-      endedAt: new Date().toISOString(),
-      exercisesDone: Object.entries(logs).flatMap(([name, sets]) => sets.map((s) => ({ name, sets: s }))),
-    };
-    setHistory([...history, newSession]);
-    try {
-      await firestoreService.addSession(newSession);
-    } catch (e) {
-      console.log(e);
-    }
 
-    setEndTime(Date.now());
-    console.log(endTime);
-    setFinished(true);
+  const saveSession = async (sessionData: Session) => {
+    try {
+      const id = await firestoreService.addSession(sessionData);
+      setSessionId(id);
+      setHistory([...history, { ...sessionData, id }]);
+      setFinished(true);
+    } catch (e) {
+      console.error("Error saving session:", e);
+    }
   };
 
   return (
     <div className="p-4 text-white space-y-6">
       {finished ? (
-        <WorkoutSummary startTime={startTime} logs={logs} />
+        <WorkoutSummary
+          startTime={startTime}
+          logs={logs}
+          sessionId={sessionId}
+          note={note}
+          photoUrl={photoUrl}
+          setNote={setNote}
+          setPhotoUrl={setPhotoUrl}
+          userUid={user.uid}
+          routineId={routine.id}
+          saveSession={saveSession}
+        />
       ) : (
         <>
           <RestTimer />
@@ -59,7 +63,7 @@ export const ActiveWorkoutScreen = () => {
           ))}
 
           <button
-            onClick={handleFinishWorkout}
+            onClick={() => setFinished(true)}
             className="w-full bg-green-600 text-white py-3 rounded-full font-semibold"
           >
             Finish Workout

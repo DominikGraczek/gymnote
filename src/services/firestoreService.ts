@@ -3,6 +3,8 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
+  setDoc, 
   query,
   where,
   orderBy,
@@ -14,7 +16,7 @@ import { Session } from "../models/session";
 import { Routine } from "../models/routine";
 import { Exercise } from "../models/exercise";
 // import { auth } from "../firebase";
-
+ 
 export const firestoreService = {
   // Sessions
   async getSessions(userId: string): Promise<Session[]> {
@@ -41,8 +43,16 @@ export const firestoreService = {
     updates: Partial<Session>
   ): Promise<void> {
     const sessionRef = doc(db, "sessions", sessionId);
-    await updateDoc(sessionRef, updates);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+      await updateDoc(sessionRef, updates);
+    } else {
+      await setDoc(sessionRef, { ...updates }); // dodaj wymagane pola jeśli trzeba
+    }
   },
+
+
 
   // Routines
   async getRoutines(userId: string): Promise<Routine[]> {
