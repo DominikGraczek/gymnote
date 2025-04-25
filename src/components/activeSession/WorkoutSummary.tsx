@@ -142,9 +142,14 @@ export const WorkoutSummary = ({
         />
 
         {photoPreview && (
-          <div className="mt-4">
-            <img src={photoPreview} alt="Workout preview" className="w-full h-64 object-cover rounded-lg" />
-          </div>
+          <section className="flex flex-col items-center">
+            <h3 className="text-2xl font-bold text-purple-700 mb-4">Photo</h3>
+            <img
+              src={photoPreview}
+              alt="Workout"
+              className="w-full max-w-2xl h-auto rounded-2xl object-cover object-center"
+            />
+          </section>
         )}
       </div>
 
