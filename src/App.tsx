@@ -14,6 +14,7 @@ import { auth } from "./firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { StatsPage } from "./components/statistics/StatsPage";
 import LoadingSpinner from "./components/LoadingSpinner";
+import { WorkoutDetailsModal } from "./components/history/WorkoutDetailsModal";
 
 function App() {
   const [user, loading] = useAuthState(auth);
@@ -80,6 +81,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <WorkoutHistoryList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history/:sessionId"
+            element={
+              <ProtectedRoute>
+                <WorkoutDetailsModal />
               </ProtectedRoute>
             }
           />
